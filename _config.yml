@@ -3,3 +3,4 @@ encoding: utf-8
 pygments: true
 safe: true
 auto: true
+permalink: date
