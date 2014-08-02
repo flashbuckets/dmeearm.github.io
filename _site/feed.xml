@@ -7,151 +7,51 @@
     <atom:link href="/feed.xml" rel="self" type="application/rss+xml" />
     
     <item>
-      <title>测试页面</title>
-      <description>&lt;h1 id=&quot;欢迎使用马克飞象专业版&quot;&gt;欢迎使用马克飞象专业版&lt;/h1&gt;
+      <title>Python title()中文标题支持</title>
+      <description>&lt;p&gt;晚上调试&lt;a href=&quot;http://yuanyong.org/pcvwithpython/&quot;&gt;《Programming Computer Vision with Python》&lt;/a&gt;中的代码时，对于图显示的标题，一直都是用英文标识的。Matplotlib这货默认不支持中文，上星期在&lt;code&gt;title()&lt;/code&gt;中用中文标识时，蹦出一黑黑的屏和一堆错误，当时本小子正忙着折腾别的，由于标题部分不长，不影响美观，就直接用英文把问题给绕开了。&lt;/p&gt;
 
-&lt;p&gt;@(示例笔记本)[马克飞象|帮助|Markdown]&lt;/p&gt;
+&lt;p&gt;绕过去的弯，总是要换还的。晚上看着图上英文标识的一长串英文，几乎每个英文标题都快超出了subplot的宽度。对于一个排版重度患者，看着真心捉急。于是，放狗一搜，竟然很快就找到答案了，也不知道上次肿么了，搜半天找到的全是要修改matplotlibrc配置文件。对于一个要分享给别人测试实验的代码，要别人在他的PC上修改配置文件，总不是一件明智的选择，况且这本书里的一些配置已经很麻烦了。&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;马克飞象&lt;/strong&gt;是一款专为印象笔记（Evernote）打造的Markdown编辑器，通过精心的设计与技术实现，配合印象笔记强大的存储和同步功能，带来前所未有的书写体验。特点概述：&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;功能丰富&lt;/strong&gt; ：支持高亮代码块、插入 &lt;em&gt;LaTex&lt;/em&gt; 公式，工作学习好帮手&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;得心应手&lt;/strong&gt; ：支持插入图片，无论是本地上传/图片URL/拖放图片/直接截图粘贴，随心所欲&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;深度整合&lt;/strong&gt; ：支持选择笔记本和添加标签，支持从印象笔记跳转编辑，轻松管理&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;号外号外，离线客户端来啦！&lt;a href=&quot;https://chrome.google.com/webstore/detail/%E9%A9%AC%E5%85%8B%E9%A3%9E%E8%B1%A1/kidnkfckhbdkfgbicccmdggmpgogehop/&quot;&gt;点击下载&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;hr&gt;
-
-&lt;h3 id=&quot;markdown简介&quot;&gt;Markdown简介&lt;/h3&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;Markdown 是一种轻量级标记语言，它允许人们使用易读易写的纯文本格式编写文档，然后转换成格式丰富的HTML页面。    —— &lt;a href=&quot;https://zh.wikipedia.org/wiki/Markdown&quot;&gt;维基百科&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;正如您在阅读的这份文档，它使用简单的符号标识不同的标题，将某些文字标记为&lt;strong&gt;粗体&lt;/strong&gt;或者&lt;em&gt;斜体&lt;/em&gt;，下面列举了几个高级功能，更多语法请按&lt;code&gt;Cmd + /&lt;/code&gt;查看帮助。 &lt;/p&gt;
-
-&lt;h4 id=&quot;代码块&quot;&gt;代码块&lt;/h4&gt;
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;nd&quot;&gt;@requires_authorization&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;somefunc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;param1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;param2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
-    &lt;span class=&quot;sd&quot;&gt;&amp;#39;&amp;#39;&amp;#39;A docstring&amp;#39;&amp;#39;&amp;#39;&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;param1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;param2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;# interesting&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;Greater&amp;#39;&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;param2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;param1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;or&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;None&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;SomeClass&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;pass&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;message&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;#39;&amp;#39;&amp;#39;interpreter&lt;/span&gt;
-&lt;span class=&quot;s&quot;&gt;... prompt&amp;#39;&amp;#39;&amp;#39;&lt;/span&gt;
+&lt;p&gt;根据搜到的答案，完全可以不用修改配置文件，而直接在python脚本的开头加上下面的代码：&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;matplotlib.font_manager&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FontProperties&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;font&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FontProperties&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fname&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;r&amp;quot;c:\windows\fonts\SimSun.ttc&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;14&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;h4 id=&quot;latex-公式&quot;&gt;LaTex 公式&lt;/h4&gt;
+&lt;p&gt;上面从&lt;code&gt;matplotlib.font_manager&lt;/code&gt;字体管理模块代入&lt;code&gt;FontProperties&lt;/code&gt;,然后设置字体属性，&lt;code&gt;FontProperties()&lt;/code&gt;设置的是Windows系统自带的宋体。关于Windows字体列表，可以查阅WIKI &lt;a href=&quot;http://zh.wikipedia.org/wiki/Microsoft_Windows%E5%AD%97%E9%AB%94%E5%88%97%E8%A1%A8&quot;&gt;Windows字体列表&lt;/a&gt;，&lt;code&gt;size&lt;/code&gt;设置的是字体的大小。对于上面Matplotlib绘图中文显示，举个今晚调试好了的例子，本例也可以参见&lt;a href=&quot;http://yuanyong.org/pcvwithpython/&quot;&gt;《Python计算机视觉编程》&lt;/a&gt;的第一章&lt;a href=&quot;http://yuanyong.org/pcvwithpython/chapter1.html&quot;&gt;图像处理基础&lt;/a&gt;:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;c&quot;&gt;# -*- coding: utf-8 -*-&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;PIL&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Image&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;pylab&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;
 
-&lt;p&gt;$$  x = \dfrac{-b \pm \sqrt{b^2 - 4ac}}{2a} $$&lt;/p&gt;
+&lt;span class=&quot;c&quot;&gt;# 添加中文字体支持&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;matplotlib.font_manager&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FontProperties&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;font&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FontProperties&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fname&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;r&amp;quot;c:\windows\fonts\SimSun.ttc&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;14&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;figure&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
 
-&lt;h4 id=&quot;表格&quot;&gt;表格&lt;/h4&gt;
+&lt;span class=&quot;n&quot;&gt;pil_im&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Image&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;open&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;../data/empire.jpg&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;gray&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;subplot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;121&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;title&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;u&amp;#39;原图&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fontproperties&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;font&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;axis&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;off&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;imshow&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pil_im&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 
-&lt;table&gt;&lt;thead&gt;
-&lt;tr&gt;
-&lt;th style=&quot;text-align: left&quot;&gt;Item&lt;/th&gt;
-&lt;th style=&quot;text-align: right&quot;&gt;Value&lt;/th&gt;
-&lt;th style=&quot;text-align: center&quot;&gt;Qty&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td style=&quot;text-align: left&quot;&gt;Computer&lt;/td&gt;
-&lt;td style=&quot;text-align: right&quot;&gt;1600 USD&lt;/td&gt;
-&lt;td style=&quot;text-align: center&quot;&gt;5&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style=&quot;text-align: left&quot;&gt;Phone&lt;/td&gt;
-&lt;td style=&quot;text-align: right&quot;&gt;12 USD&lt;/td&gt;
-&lt;td style=&quot;text-align: center&quot;&gt;12&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style=&quot;text-align: left&quot;&gt;Pipe&lt;/td&gt;
-&lt;td style=&quot;text-align: right&quot;&gt;1 USD&lt;/td&gt;
-&lt;td style=&quot;text-align: center&quot;&gt;234&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;&lt;/table&gt;
+&lt;span class=&quot;n&quot;&gt;pil_im&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Image&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;open&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;../data/empire.jpg&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;convert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;L&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;subplot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;122&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;title&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;u&amp;#39;灰度图&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fontproperties&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;font&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;axis&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;#39;off&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;imshow&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pil_im&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 
-&lt;h3 id=&quot;印象笔记相关&quot;&gt;印象笔记相关&lt;/h3&gt;
+&lt;span class=&quot;n&quot;&gt;show&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;上面代码&lt;code&gt;title()&lt;/code&gt;中，字体属性&lt;code&gt;fontproperties=font&lt;/code&gt;,即开头已经设置好了的字体属性，需要注意的是中文标识前有个字母&lt;strong&gt;u&lt;/strong&gt;,这个不能少，否则会出错。秀一下上面代码运行的结果：&lt;/p&gt;
 
-&lt;h4 id=&quot;笔记本和标签&quot;&gt;笔记本和标签&lt;/h4&gt;
+&lt;p&gt;&lt;img src=&quot;/public/images/posts/2014-03-18-ch01_P002-003_PIL.png&quot; alt=&quot;2014-03-18-ch01_P002-003_PIL&quot;&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;马克飞象&lt;/strong&gt;增加了&lt;code&gt;@(笔记本)[标签A|标签B]&lt;/code&gt;语法, 以选择笔记本和添加标签。 &lt;strong&gt;绑定账号后&lt;/strong&gt;， 输入&lt;code&gt;(&lt;/code&gt;自动会出现笔记本列表，请从中选择。自己纯手工输入无效。&lt;/p&gt;
-
-&lt;h4 id=&quot;标题&quot;&gt;标题&lt;/h4&gt;
-
-&lt;p&gt;&lt;strong&gt;马克飞象&lt;/strong&gt;会自动使用文档内出现的第一个标题作为笔记标题。例如本文，就是第一行的 &lt;code&gt;欢迎使用马克飞象&lt;/code&gt;。&lt;/p&gt;
-
-&lt;h4 id=&quot;快捷编辑&quot;&gt;快捷编辑&lt;/h4&gt;
-
-&lt;p&gt;保存在印象笔记中的笔记，右上角会有一个红色的编辑按钮，点击后会回到&lt;strong&gt;马克飞象&lt;/strong&gt;中打开并编辑该笔记。&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;注意：&lt;/strong&gt;目前用户在印象笔记中单方面做的任何修改，马克飞象是无法自动感知和更新的。所以请务必回到马克飞象编辑。&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h4 id=&quot;数据同步&quot;&gt;数据同步&lt;/h4&gt;
-
-&lt;p&gt;&lt;strong&gt;马克飞象&lt;/strong&gt;通过&lt;strong&gt;将Markdown原文以隐藏内容保存在笔记中&lt;/strong&gt;的精妙设计，实现了对Markdown的存储和再次编辑。既解决了其他产品只是单向导出HTML的单薄，又规避了服务端存储Markdown带来的隐私安全问题。这样，服务端仅作为对印象笔记 API调用和数据转换之用。&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;隐私声明：用户所有的笔记数据，均保存在印象笔记中。马克飞象不存储用户的任何笔记数据。&lt;/strong&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h4 id=&quot;离线存储&quot;&gt;离线存储&lt;/h4&gt;
-
-&lt;p&gt;&lt;strong&gt;马克飞象&lt;/strong&gt;使用浏览器离线存储将内容实时保存在本地，不必担心网络断掉或浏览器崩溃。为了节省空间和避免冲突，已同步至印象笔记并且不再修改的笔记将删除部分本地缓存，不过依然可以随时通过&lt;code&gt;文档管理&lt;/code&gt;打开。&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;注意：&lt;/strong&gt;虽然浏览器存储大部分时候都比较可靠，但印象笔记作为专业云存储，更值得信赖。以防万一，&lt;strong&gt;请务必经常及时同步到印象笔记&lt;/strong&gt;。&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h3 id=&quot;快捷键&quot;&gt;快捷键&lt;/h3&gt;
-
-&lt;p&gt;帮助    &lt;code&gt;Cmd + /&lt;/code&gt;
-同步文档    &lt;code&gt;Cmd + S&lt;/code&gt;
-创建文档    &lt;code&gt;Cmd + Opt + N&lt;/code&gt;
-最大化编辑器    &lt;code&gt;Cmd + Enter&lt;/code&gt;
-文档管理    &lt;code&gt;Cmd + O&lt;/code&gt;
-系统菜单    &lt;code&gt;Cmd + M&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;整行移动    &lt;code&gt;Opt + 上/下箭头&lt;/code&gt;
-删除整行    &lt;code&gt;Cmd + D&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;加粗    &lt;code&gt;Cmd + B&lt;/code&gt;
-插入图片    &lt;code&gt;Cmd + G&lt;/code&gt;
-插入链接    &lt;code&gt;Cmd + L&lt;/code&gt;
-提升标题    &lt;code&gt;Cmd + H&lt;/code&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;关于专业版&quot;&gt;关于专业版&lt;/h3&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;注意：专业版目前处于公测阶段，未来可能进行收费。请根据自己的实际情况，合理选择专业版和基础版。&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;&lt;strong&gt;马克飞象&lt;/strong&gt;专业版相较于基础版，最基本的Markdown转换与同步功能目前基本一致，主要区别在于：
-- 更强大的编辑器，包括快捷键、语法高亮、主题以及非常多的细节优化
-- 稳定可靠的本地文件缓存和管理
-- 细致入微的界面与操作体验
-- 用户自定义配置
-- 离线客户端
-- 开发者更多的精力投入
-- 更多惊喜&lt;/p&gt;
-
-&lt;h3 id=&quot;反馈与建议&quot;&gt;反馈与建议&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;微博：&lt;a href=&quot;http://weibo.com/u/2788354117&quot;&gt;@马克飞象&lt;/a&gt;，&lt;a href=&quot;http://weibo.com/ggock&quot; title=&quot;开发者个人账号&quot;&gt;@GGock&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;邮箱：&lt;a href=&quot;mailto:hustgock@gmail.com&quot;&gt;hustgock@gmail.com&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
+&lt;p&gt;时间不早了，睡觉。&lt;/p&gt;
 
 &lt;hr&gt;
 
-&lt;p&gt;感谢阅读这份帮助文档。请点击右上角，绑定印象笔记账号，开启全新的记录与分享体验吧。&lt;/p&gt;
+&lt;p&gt;Reference：&lt;/p&gt;
+
+&lt;p&gt;[1]. &lt;a href=&quot;http://blog.chinaunix.net/uid-26611383-id-3521248.html&quot;&gt;python中matplotlib绘图中文显示问题&lt;/a&gt;&lt;/p&gt;
 </description>
       <pubDate>Sat, 02 Aug 2014 00:00:00 +0800</pubDate>
       <link>/blog/test_page.html</link>
