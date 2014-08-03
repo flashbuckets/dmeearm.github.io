@@ -7,10 +7,10 @@ timezone: Asia/Chongqing
 # Overriden by GitHub Pages: https://help.github.com/articles/using-jekyll-with-pages#configuring-jekyll
 safe: true
 lsi: false
-markdown: redcarpet
-redcarpet:
-  extensions: ["no_intra_emphasis", "fenced_code_blocks", "autolink", "tables", "with_toc_data"]
-
+#markdown: redcarpet
+#redcarpet:
+#  extensions: ["no_intra_emphasis", "fenced_code_blocks", "autolink", "tables", "with_toc_data"]
+markdown: rdiscount
 # Keybase
 include:
   - .well-known
