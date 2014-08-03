@@ -7,12 +7,8 @@
     <atom:link href="/feed.xml" rel="self" type="application/rss+xml" />
     
     <item>
-      <title>Cmd 现在markdown编辑器</title>
-      <description>&lt;h1&gt;欢迎使用 Cmd - 在线 Markdown 编辑阅读器&lt;/h1&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;我们理解您需要更便捷更高效的工具记录思想，整理笔记、知识，并将其中承载的价值传播给他人，&lt;strong&gt;Cmd Markdown&lt;/strong&gt; 是我们给出的答案 —— 我们为记录思想和分享知识提供更专业的工具。&lt;/p&gt;
+      <title>在线markdown编辑器-Cmd</title>
+      <description>&lt;p&gt;我们理解您需要更便捷更高效的工具记录思想，整理笔记、知识，并将其中承载的价值传播给他人，&lt;strong&gt;Cmd Markdown&lt;/strong&gt; 是我们给出的答案 —— 我们为记录思想和分享知识提供更专业的工具。&lt;/p&gt;
 
 &lt;p&gt;您可以使用 Cmd Markdown：&lt;/p&gt;
 
