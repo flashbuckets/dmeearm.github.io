@@ -162,10 +162,15 @@
       <description>&lt;p&gt;今天一个前同事在qq跟我聊最近去两家公司面试的经历，他说被打击的不轻。先说说他的经历吧。&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;一家小公司，面试他的是一位北大的硕士，在学校的时候搞过ACM，公司里的职位是算法工程师。面试题目是让他写一个“&lt;a href=&quot;http://baike.baidu.com/view/1734081.htm&quot;&gt;&lt;strong&gt;蛇形矩阵&lt;/strong&gt;&lt;/a&gt;”算法。说实话，我还真没听说这玩意，搜索了下才发现这东西之前听说过，但是当时叫的名字没有这么专业。这个题目其实是ACM的入门题，俗称水题，送经验的。&lt;/li&gt;
-&lt;li&gt;另一家公司是知乎，因为我这位同事是搞python的，所以去知乎挺对口。面试官安排的上机题，两道要求在半个小时内解决掉，题目是这样的：
-&amp;gt; 1. 给你一堆1，2，5，8面值的硬币，然后给你一个面值，用最少的个数的硬币凑出来
-&amp;gt; 2. 给定一个数组，构建二叉树，并且按层次打印这个二叉树&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;一家小公司，面试他的是一位北大的硕士，在学校的时候搞过ACM，公司里的职位是算法工程师。面试题目是让他写一个“&lt;a href=&quot;http://baike.baidu.com/view/1734081.htm&quot;&gt;&lt;strong&gt;蛇形矩阵&lt;/strong&gt;&lt;/a&gt;”算法。说实话，我还真没听说这玩意，搜索了下才发现这东西之前听说过，但是当时叫的名字没有这么专业。这个题目其实是ACM的入门题，俗称水题，送经验的。&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;另一家公司是知乎，因为我这位同事是搞python的，所以去知乎挺对口。面试官安排的上机题，两道要求在半个小时内解决掉，题目是这样的：&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;ol&gt;
+&lt;li&gt;给你一堆1，2，5，8面值的硬币，然后给你一个面值，用最少的个数的硬币凑出来&lt;/li&gt;
+&lt;li&gt;给定一个数组，构建二叉树，并且按层次打印这个二叉树&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/blockquote&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;hr&gt;
