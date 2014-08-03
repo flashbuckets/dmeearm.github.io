@@ -23,11 +23,11 @@ Markdown 是一种方便记忆、书写的纯文本标记语言，用户可以�
 
 ### 书写一个质能守恒公式[^LaTeX]
 
-$$E=mc^2$$
+### $$E=mc^2$$
 
 ### 高亮一段代码[^code]
 
-```python
+``` python
 @requires_authorization
 class SomeClass:
     pass
@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
 ### 高效绘制 [流程图](https://www.zybuluo.com/mdeditor?url=https://www.zybuluo.com/static/editor/md-help.markdown#7-流程图)
 
-```flow
+``` flow
 st=>start: Start
 op=>operation: Your Operation
 cond=>condition: Yes or No?
@@ -52,7 +52,7 @@ cond(no)->op
 
 ### 高效绘制 [序列图](https://www.zybuluo.com/mdeditor?url=https://www.zybuluo.com/static/editor/md-help.markdown#8-序列图)
 
-```seq
+``` seq
 Alice->Bob: Hello Bob, how are you?
 Note right of Bob: Bob thinks
 Bob-->Alice: I am good thanks!
