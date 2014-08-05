@@ -61,8 +61,9 @@
 &lt;p&gt;TCP has a bigger header than UDP. Usual header size of a TCP packet is 20 bytes which is more than double of 8 bytes, header size of UDP datagram packet. TCP header contains Sequence Number, Ack number, Data offset, Reserved, Control bit, Window, Urgent Pointer, Options, Padding, Check Sum, Source port, and Destination port. While UDP header only contains Length, Source port, Destination port, and Check Sum. Here is how TCP and UDP header looks like :&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;http://talkpower.info/images/posts/TCP-Packet-Format-Diagram.gif&quot; alt=&quot;tcp&quot;&gt;
-TCP Header Format
-&lt;img src=&quot;http://talkpower.info/images/posts/UDP-Packet-format.jpg&quot; alt=&quot;tcp&quot;&gt;
+TCP Header Format&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://talkpower.info/images/posts/UDP-Packet-format.jpg&quot; alt=&quot;tcp&quot;&gt;
 UDP Header Format &lt;/p&gt;
 
 &lt;ul&gt;
