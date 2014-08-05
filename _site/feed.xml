@@ -22,7 +22,7 @@
 
 &lt;p&gt;TCP Handshake Message DiagramThe first and foremost difference between them is that TCP is a connection oriented protocol while UDP is a connection-less protocol. This means  a connection is established between client and server, before they can send data over TCP. Connection establishment process is also known as TCP hand shaking where control messages are interchanged between client and server. The image here describes the process of a TCP handshake, where control messages are exchanged between client and server. Client, which is the initiator of TCP connection, sends a SYN message to the server, which is listening on a TCP port. Server receives and sends a SYN-ACK message, which is received by client again and responded using ACK. Once the server receive this ACK message,  the TCP connection is established and ready for data transmission. On the other hand, UDP is a connection less protocol, and point to point connection is not established before sending messages. That’s the reason why, UDP is more suitable for multicast distribution of message, one to many distribution of data in single transmission.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;http://talkpower.info/posts/TCP-Handshake-Message-Diagram.jpg&quot; alt=&quot;handoff&quot;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://talkpower.info/imagesposts/TCP-Handshake-Message-Diagram.jpg&quot; alt=&quot;handoff&quot;&gt;&lt;/p&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Reliability&lt;/li&gt;
@@ -60,9 +60,9 @@
 
 &lt;p&gt;TCP has a bigger header than UDP. Usual header size of a TCP packet is 20 bytes which is more than double of 8 bytes, header size of UDP datagram packet. TCP header contains Sequence Number, Ack number, Data offset, Reserved, Control bit, Window, Urgent Pointer, Options, Padding, Check Sum, Source port, and Destination port. While UDP header only contains Length, Source port, Destination port, and Check Sum. Here is how TCP and UDP header looks like :&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;http://talkpower.info/posts/TCP-Packet-Format-Diagram.gif&quot; alt=&quot;tcp&quot;&gt;
+&lt;p&gt;&lt;img src=&quot;http://talkpower.info/images/posts/TCP-Packet-Format-Diagram.gif&quot; alt=&quot;tcp&quot;&gt;
 TCP Header Format
-&lt;img src=&quot;http://talkpower.info/posts/UDP-Packet-format.jpg&quot; alt=&quot;tcp&quot;&gt;
+&lt;img src=&quot;http://talkpower.info/images/posts/UDP-Packet-format.jpg&quot; alt=&quot;tcp&quot;&gt;
 UDP Header Format &lt;/p&gt;
 
 &lt;ul&gt;
