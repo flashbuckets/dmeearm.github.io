@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google-site-verification" content="aexITLS38FdIRzwj25OVWxm87rpa9l-UV0URTyC9cTs" />
+  <title>
+    9 Differences between TCP and UDP Protocol
+    
+  </title>
+  <link rel="stylesheet" href="/css/site.css">
+  <!--<link type="text/css" rel="stylesheet" href="http://fonts.googleapis.com/css?family=Ubuntu+Mono|Asap:400,700,400italic">-->
+  <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+<!--
+  
+-->
+  
+
+  
+</head>
+<body>
+  <div class="top-bar">
+<!--    
+    In September, come to France to <a href="http://surfcamp.lewagon.org"><strong>code</strong> & <strong>surf</strong></a>!
+    -->
+  </div>
+
+  <div class="header-container">
+    <header class="inner">
+      <nav>
+        <a class="" href="/">About</a>
+        <a class="" href="/blog/">Blog</a>
+        <a class="" href="/project/">Project</a>
+        <a class=" contact" href="/contact/">Contact</a>
+        <!--<a href="https://github.com/dmeearm">Github</a>-->
+      </nav>
+      <div class="pull-right right logo">
+        <div class="name">
+          <a href="/">aweth0me</a><br />
+          <small>
+            <em>
+                <a href="/">System Development Engineer</a>
+            </em>
+          </small>
+        </div>
+        <img class="avatar" src="/images/YongYuan.png" alt="My profile picture" />
+      </div>
+      <div class="clear"></div>
+    </header>
+    <div class="clear"></div>
+  </div>
+
+  
+
+<article>
+  <h1 class="inner">
+    9 Differences between TCP and UDP Protocol
+  </h1>
+
+  <p class="meta">Tuesday 5 August 2014</p>
+
+  
+
+  <div class="post">
+    <p>TCP and UDP are two transport layer protocols, which are extensively used in internet for transmitting data between one host to another. Good knowledge of how TCP and UDP works is essential for any programmer. That’s why differences between TCP and UDP is a popular Java programming interview question. I have seen this question many times on various Java interviews , especially for server side Java developer positions. Since FIX (Financial Information Exchange) protocol is also a TCP based protocol, several investment banks, hedge funds, and exchange solution providers look for Java developers with good knowledge of TCP and UDP. Writing FIX engines and server side components for high speed electronic trading platforms requires capable developers with a solid understanding of the fundamentals including data structure, algorithms and networking.</p>
+
+<p>By the way, use of TCP and UDP is not limited to one area, it’s at the heart of internet. The protocol which is core of internet, HTTP is based on TCP. One more reason, why a Java developer should understand these two protocols in detail is that Java is extensively used to write multi-threaded, concurrent and scalable servers. Java also provides a rich Socket programming API for both TCP and UDP based communication. In this article, we will learn the key differences between the TCP and UDP protocols. To start with, TCP stands for Transmission Control Protocol and UDP stands for User Datagram Protocol, and both are used extensively to build Internet applications.</p>
+
+<h2 id="differences-between-tcp-vs-udp-protocol">Differences between TCP vs UDP Protocol</h2>
+
+<p>I love to compare two things on different points, this not only makes them easy to compare but also makes it easy to remember differences. When we compare TCP to UDP, we learn difference in how both TCP and UDP works, we learn which one provides reliable and guaranteed delivery and which doesn’t. Which protocol is fast and why, and most importantly when to choose TCP over UDP while building your own distributed application. In this article we will see difference between UDP and TCP in 9 points, e.g. connection set-up, reliability, ordering, speed, overhead, header size, congestion control, application, different protocols based upon TCP and UDP and how they transfer data.</p>
+
+<ul>
+<li>Connection oriented vs Connection less</li>
+</ul>
+
+<p>TCP Handshake Message DiagramThe first and foremost difference between them is that TCP is a connection oriented protocol while UDP is a connection-less protocol. This means  a connection is established between client and server, before they can send data over TCP. Connection establishment process is also known as TCP hand shaking where control messages are interchanged between client and server. The image here describes the process of a TCP handshake, where control messages are exchanged between client and server. Client, which is the initiator of TCP connection, sends a SYN message to the server, which is listening on a TCP port. Server receives and sends a SYN-ACK message, which is received by client again and responded using ACK. Once the server receive this ACK message,  the TCP connection is established and ready for data transmission. On the other hand, UDP is a connection less protocol, and point to point connection is not established before sending messages. That’s the reason why, UDP is more suitable for multicast distribution of message, one to many distribution of data in single transmission.</p>
+
+<p><img src="http://talkpower.info/posts/TCP-Handshake-Message-Diagram.jpg" alt="handoff"></p>
+
+<ul>
+<li>Reliability</li>
+</ul>
+
+<p>TCP provides delivery guarantee, which means a message sent using TCP protocol is guaranteed to be delivered to the client. If a message is lost in transit then it is recovered using resending, which is handled by the TCP protocol itself. On the other hand, UDP is unreliable, it doesn’t provide any delivery guarantee. A datagram package may be lost in transit. That’s why UDP is not suitable for programs which require guaranteed delivery.</p>
+
+<ul>
+<li>Ordering</li>
+</ul>
+
+<p>Apart from delivery guarantee, TCP also guarantees order of message. The messages will be delivered to the client in the same order that the server has sent them, though its possible they may reach out of order to the other end of the network. TCP protocol will do all the sequencing and ordering for you. UDP doesn’t provide any ordering or sequencing guarantee. Datagram packets may arrive in any order. That’s why TCP is suitable for application which need delivery in sequenced manner, though there are UDP based protocols as well which provide ordering and reliability by using sequence number and redelivery e.g. TIBCO Rendezvous, which is actually a UDP based application.</p>
+
+<ul>
+<li>Data Boundary</li>
+</ul>
+
+<p>TCP does not preserve data boundary, UDP does. In Transmission control protocol, data is sent as a byte stream, and no distinguishing indications are transmitted to signal message (segment) boundaries. On UDP, Packets are sent individually and are checked for integrity only if they arrived. Packets have definite boundaries which are honoured upon receipt, meaning a read operation at the receiver socket will yield an entire message as it was originally sent. Though TCP will also deliver complete message after assembling all bytes. Messages are stored on TCP buffers before sending to make optimum use of network bandwidth.</p>
+
+<ul>
+<li>Speed</li>
+</ul>
+
+<p>In one word, TCP is slow and UDP is fast. Since TCP does has to create connection, ensure guaranteed and ordered delivery, it does lot more than UDP. This costs TCP in terms of speed, that’s why UDP is more suitable where speed is a concern, for example online video streaming, telecast or online multi player games.</p>
+
+<ul>
+<li>Heavy weight vs Light weight</li>
+</ul>
+
+<p>Because of the overhead mentioned above, Transmission control protocol is considered as heavy weight as compared to light weight UDP protocol. The simple mantra of UDP is to deliver messages without bearing any overhead of creating a connection and guaranteeing delivery or order guarantee. This is also reflected in their header sizes, which is used to carry meta data.</p>
+
+<ul>
+<li>Header size</li>
+</ul>
+
+<p>TCP has a bigger header than UDP. Usual header size of a TCP packet is 20 bytes which is more than double of 8 bytes, header size of UDP datagram packet. TCP header contains Sequence Number, Ack number, Data offset, Reserved, Control bit, Window, Urgent Pointer, Options, Padding, Check Sum, Source port, and Destination port. While UDP header only contains Length, Source port, Destination port, and Check Sum. Here is how TCP and UDP header looks like :</p>
+
+<p><img src="http://talkpower.info/posts/TCP-Packet-Format-Diagram.gif" alt="tcp">
+TCP Header Format
+<img src="http://talkpower.info/posts/UDP-Packet-format.jpg" alt="tcp">
+UDP Header Format </p>
+
+<ul>
+<li>Congestion or Flow control</li>
+</ul>
+
+<p>TCP does Flow Control. TCP requires three packets to set up a socket connection, before any user data can be sent. TCP handles reliability and congestion control. On the other hand, UDP does not have an option for flow control.</p>
+
+<ul>
+<li>Usage and application</li>
+</ul>
+
+<p>Where does TCP and UDP are used in internet? After knowing key differences between TCP and UDP, we can easily conclude, which situation suits them. Since TCP provides delivery and sequencing guaranty, it is best suited for applications that require high reliability, and transmission time is relatively less critical. While UDP is more suitable for applications that need fast, efficient transmission, such as games. UDP’s stateless nature is also useful for servers that answer small queries from huge numbers of clients. In practice, TCP is used in the finance domain e.g. the FIX protocol is a TCP based protocol, while UDP is used heavily in gaming and entertainment sites.</p>
+
+<ul>
+<li>TCP and UDP based Protocols</li>
+</ul>
+
+<p>One of the best example of TCP based higher end protocol is HTTP and HTTPS, which is everywhere on internet. In fact most of the common protocols you are familiar of e.g. Telnet, FTP and SMTP all are based over Transmission Control Protocol. UDP don’t have anything as popular as HTTP but it is also extensively used in protocol like DHCP and DNS. Some of the other protocols which are based on the User Datagram protocol are Simple Network Management Protocol (SNMP), TFTP, BOOTP and NFS (early versions).</p>
+
+<p>Always remember to mention that TCP is connection oriented, reliable, slow, provides guaranteed delivery and preservers order of messages, while UDP is connection less, unreliable, no ordering guarantee, but a fast protocol. TCP overhead is also much higher than UDP, as it transmits more meta data per packet than UDP. It’s worth mentioning that header size of Transmission control protocol is 20 bytes, compared to 8 bytes header of User Datagram protocol. Use TCP, if you can’t afford to lose any message, while UDP is better for high speed data transmission, where loss of single packet is acceptable e.g. video streaming or online multi player games. While working in TCP/UDP based application on Linux, it’s also good to remember basic networking commands e.g. telnet and netstat, they help tremendously to debug or troubleshoot any connection issue.</p>
+
+  </div>
+</article>
+
+<section class="post-footer-self-promotion inner">
+
+	<a href="http://weibo.com/u/1736566822" target="_blank">
+	<img class="avatar" src="/images/YongYuan.png" />
+	</a>
+	
+	<p>
+	<!--
+	Do you like <strong>coding</strong>? Do you like or would you like to learn <strong>surfing</strong>? Book your tickets for the next Le Wagon <a href="http://surfcamp.lewagon.org"><strong>Code &amp; Surf Camp</strong></a>!
+        -->
+	Thanks for reading! Do you want to keep up with what I do?
+	<a href="http://weibo.com/u/1736566822">Follow me on Weibo</a>.
+	
+	</p>
+
+	<div id="more-articles">
+	  
+	  <p>
+		If you liked this, feel free to <a href="/blog">browse other articles on my blog</a>.
+	  </p>
+	  
+	</div>
+<!--	
+    <a href="https://twitter.com/marcgg" class="twitter-follow-button" data-show-count="false" data-size="large">Follow @marcgg</a>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+    <a href="https://twitter.com/share" class="twitter-share-button" data-via="marcgg" data-size="large">Tweet</a>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+-->
+  </div>
+  
+</section>
+
+<div class="separator"></div>
+
+<section class="comments inner">
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'dmeearm'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</section>
+
+  <div class="separator"></div>
+
+  <div  style="border-bottom: 1px solid #ddd"></div>
+  <footer>
+    <p>
+      Made with <a href="http://jekyllrb.com/">Jekyll</a>,
+      hosted on <a href="https://github.com/dmeearm/dmeearm.github.io">Github Pages</a>. Theme inspired by <a href="http://marcgg.com">marcgg.com</a>.
+    </p>
+    <ul class="links">
+      <li>
+        <a href="https://github.com/dmeearm" title="See my code on GitHub">
+          <i class="icon-github"></i>
+        </a>
+      </li>
+      <li>
+        <a href="https://twitter.com/yujieding" title="Follow me on Twitter">
+          <i class="icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a href="http://weibo.com/u/1736566822" title="Contact me on Weibo"></a>
+          <i class="icon-feed"></i>
+      </li>
+      <li>
+        <a href="/feed.xml" title="Subscribe to my blog with RSS">
+          <i class="icon-feed"></i>
+        </a>
+      </li>
+    </ul>
+  </footer>
+
+    <script type="text/x-mathjax-config">
+    // 添加数学公式支持
+    MathJax.Hub.Config({
+    tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+    });
+
+    MathJax.Hub.Queue(function() {
+    // Fix <code> tags after MathJax finishes running. This is a
+    // hack to overcome a shortcoming of Markdown. Discussion at
+    // https://github.com/mojombo/jekyll/issues/199
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+    });
+    </script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-40867989-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+    /*!
+     * http://github.com/ssaunier/track-outbound-links
+     * Copyright 2013 Sébastien Saunier
+     * @license MIT
+     */
+    !function(e,t){function n(){for(var n=t.getElementsByTagName("a"),a=[],r=0;r<n.length;++r){var o=n[r];o.host!=e.location.host&&a.push(o)}return a}function a(n){for(var a=n.srcElement||n.target;a&&("undefined"==typeof a.tagName||"a"!=a.tagName.toLowerCase()||!a.href);)a=a.parentNode;a&&a.href&&(e._gaq&&_gaq.push(["_trackEvent","Outbound link","Click",a.href]),(!a.target||a.target.match(/^_(self|parent|top)$/i))&&(setTimeout(function(){t.location.href=a.href},150),n.preventDefault?n.preventDefault():n.returnValue=!1))}e.addEventListener("load",function(){var e=n();for(var t in e)e[t].addEventListener("click",a)})}(window,document);
+    var links = document.links;
+    for (var i = 0, linksLength = links.length; i < linksLength; i++) {
+       if (links[i].hostname != window.location.hostname) { links[i].target = '_blank'; }
+    }
+
+    /*
+     * Detect if we are included in an iframe => move.
+     */
+    if (window.top !== window.self
+        && !window.self.location.href.match(/headsha\.re/))
+    {
+      window.top.location.replace(window.self.location.href);
+    }
+  </script>
+
+  <!--
+  <script id="_webengage_script_tag" type="text/javascript">
+    // var _weq = _weq || {};
+    // _weq['webengage.licenseCode'] = '11b563c38';
+    // _weq['webengage.widgetVersion'] = "4.0";
+
+    // (function(d){
+    //   var _we = d.createElement('script');
+    //   _we.type = 'text/javascript';
+    //   _we.async = true;
+    //   _we.src = (d.location.protocol == 'https:' ? "https://ssl.widgets.webengage.com" : "http://cdn.widgets.webengage.com") + "/js/widget/webengage-min-v-4.0.js";
+    //   var _sNode = d.getElementById('_webengage_script_tag');
+    //   _sNode.parentNode.insertBefore(_we, _sNode);
+    // })(document);
+  </script>
+  -->
+
+</body>
+</html>
