@@ -7,6 +7,15 @@
     <atom:link href="/feed.xml" rel="self" type="application/rss+xml" />
     
     <item>
+      <title>stackedit.io测试页面</title>
+      <description>&lt;p&gt;test&lt;/p&gt;
+</description>
+      <pubDate>Sun, 12 Oct 2014 00:00:00 +0800</pubDate>
+      <link>/blog/test_stackeditio.html</link>
+      <guid isPermaLink="true">/blog/test_stackeditio.html</guid>
+    </item>
+    
+    <item>
       <title>在小公司混</title>
       <description>&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;最近这段时间公司在招人，我也面试了不少应聘者，以30岁上下，工作5年左右的人居多。这个年龄段其实是中小公司的主要选择对象，这类公司一般招人都是为了项目需要或者急需熟手来干活，而很少像大公司那样，招一些有潜力，底子好，有上进新的应届学生。在市面上有能力的新人往往在校招阶段就被大公司靠着自己的招牌和有竞争力的薪资待遇收拢到旗下，而对于社招，更是优中选优，挑三挑四。总而言之，大厂把品相好的果子挑走之后，留下一些“残羹剩菜”让中小厂，去自己筛一筛，看看能不能找到一些还能吃，能用的。当然也有很多高质量的人才，会被大厂漏掉。小公司在招人这个方面确实是很痛苦，除了大厂疯狂抢夺人的原因之外，一方面没有充足的预算来提供足够吸引人的薪资福利，另一方面，技术和企业文化氛围也普遍差强人意。
 
