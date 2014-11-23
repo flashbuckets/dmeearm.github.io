@@ -47,5 +47,7 @@ nginx在ngx_http_upstream_init_request函数中完成缓存对象的创建，这
 讨论先告一个段落，其实现在都是一些准备工作，下次讨论后端内容到来的处理。
 
 扩展阅读：
+
 http://www.pagefault.info/?p=123
+
 http://www.pagefault.info/?p=375
