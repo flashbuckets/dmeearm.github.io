@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google-site-verification" content="aexITLS38FdIRzwj25OVWxm87rpa9l-UV0URTyC9cTs" />
+  <title>
+    缓存服务器设计与实现(五)
+    
+  </title>
+  <link rel="stylesheet" href="/css/site.css">
+  <!--<link type="text/css" rel="stylesheet" href="http://fonts.googleapis.com/css?family=Ubuntu+Mono|Asap:400,700,400italic">-->
+  <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+<!--
+  
+-->
+  
+
+  
+</head>
+<body>
+  <div class="top-bar">
+<!--    
+    In September, come to France to <a href="http://surfcamp.lewagon.org"><strong>code</strong> & <strong>surf</strong></a>!
+    -->
+  </div>
+
+  <div class="header-container">
+    <header class="inner">
+      <nav>
+        <a class="" href="/">About</a>
+        <a class="" href="/blog/">Blog</a>
+        <a class="" href="/project/">Project</a>
+        <a class=" contact" href="/contact/">Contact</a>
+        <!--<a href="https://github.com/dmeearm">Github</a>-->
+      </nav>
+      <div class="pull-right right logo">
+        <div class="name">
+          <a href="/">aweth0me</a><br />
+          <small>
+            <em>
+                <a href="/">System Development Engineer</a>
+            </em>
+          </small>
+        </div>
+        <img class="avatar" src="/images/YongYuan.png" alt="My profile picture" />
+      </div>
+      <div class="clear"></div>
+    </header>
+    <div class="clear"></div>
+  </div>
+
+  
+
+<article>
+  <h1 class="inner">
+    缓存服务器设计与实现(五)
+  </h1>
+
+  <p class="meta">Sunday 30 November 2014</p>
+
+  
+
+  <div class="post">
+    <p>上次讲到lru与缓存重建，这次主要讲一下关于过期处理的一些主要问题。在讨论这个问题之前，有个相关的问题需要大家有所了解。就是对于一个缓存如期只来说，什么东西应该缓存，什么不应该缓存。这是一个比较复杂的问题，涉及到http协议的诸多细节。这里赵永明大哥写了一篇文章，讲得很详细，虽然是以ATS为背景讲的，但是思路是想通的，大家可以点击这里去看一下，文章名字很骚气叫“<strong>to cache or not to cache，一直是个大问题</strong>”。</p>
+
+<p>在缓存服务器里，分hit和miss两种行为。前面的文章已经讲过了，服务器本地有缓存叫hit处理（也会因为if-modified-since转成miss处理，这个后面讲），无缓存是miss处理。过期处理自然发生的本地有相应文件的基础上，miss情况下根本没有校验文件过期与否的动作可言。这里我以我们cache服务器为例讲一下基本的过期处理流程，当然开源的squid，ats之类的在这块也是大同小异。</p>
+
+<p>一个文件缓存与否，包括缓存多长时间，通常取决于取源返回的响应中关于缓存相关的一些头部，例如：Expires，Cache-Control，Pragma， Last-Modified，Etag， Age，Vary等。这些头的解释，大家可以去翻看协议，不想翻协议的，可以从这里找到一个总结，这里就不浪费口舌了。</p>
+
+<p>但是有一种情况必须考虑，对于CDN来说，他们服务的客户运营水平参差不齐，很多都没有相关的响应头来告诉CDN厂商，他们想缓存多长时间。通常在这种情况下，CDN厂商有这样一些规则，要么缓存指定的一段时间，这个时间CDN厂商自己控制。要么针对不同的文件后缀，对缓存时间做更细致化的控制，这种情况就不再讨论了。我们接下来重点讨论有正规缓存头部的情况。</p>
+
+<p>当请求到来，cache服务器在本地找到了相应的文件，这里所谓的“找到的文件”多数都是所谓的文件在内存中的索引结构，因为这个结构中通常包括对应磁盘文件的所有信息。为了方便讨论，我们这里暂且把这个索引结构叫做store。</p>
+
+<p>首先store结构中有一个成员，我们暂且叫cache_time，它记录的是缓存服务器在最开始存储这个文件时的时间，通俗点说就是取源回来开始缓存这个文件，就把当前时间记录在cache_time这个成员里。也可以说这个时间认为是缓存开始在本地构建这个文件的时间。</p>
+
+<p>在store结构中通常有一个成员来保存源响应头中Date字段对应的时间戳，我们暂且将这个成员叫做backend_date，这个头一般是后端服务器在发送响应时拿它的当前时间戳构建的。</p>
+
+<p>为了方便讨论，我们把缓存服务器的当前时间称为current_time。</p>
+
+<p>-首先处理Cache-Control的相关头部。如果cache_time+ max-age &lt; current_time，说明这个文件过期了。这里的max-age是Cache-Control中的一个字段。否则当前的验证说明未过期，需要进一步检查其他过期信息。</p>
+
+<p>-如果存在源响应带有Expires头，那么比较expires - backend_date与current_time - cache_time的大小。首先前者表示这个文件在源服务器还有多长时间过期，后者表示这个文件在本机创建，当现在已经过去了多长时间。如果前者大于后者，意味文件可以继续使用，未过期。当然这是基于第一点中max-age检查，未过期的基础之上的。如果前者小于后者呢？我们就认为是过期了，但是会出现这种情况吗？后者的时间差来自于本地服务器，我们假定是准确的，但是前者的时间来自于其他后端服务器，不一定准确，就可能出现这种情况。出现了这种情况，只能当做过期处理。我们也碰到过自己的机器时间不准了导致文件异常过期的bug。所以缓存服务器通常在启动时要确认机器时间是否准确，这点很重要。</p>
+
+<p>在以上这里点检查通过之后，未标记为过期的，会进到后续的hit处理流程。过期的就需要取源。所以取源有两种，第一种是本地没有缓存该文件，另一种是文件已经缓存过，但是现在过期了。过期回源是，涉及到回源验证的问题。什么是回源验证？当一个文件过期了，你回源重新取的时候，可能这个文件在源服务器上并没有改动过，那么这时缓存服务器再取一遍是很傻，也是浪费带宽，降低性能的事情。这个时候，在store结构中有个成员往往保存了一个时间戳，我们暂且叫做mod_time，这个时间戳来自于最开始构建文件时，源给的响应中的Last-Modified头，这个头中的时间告诉了我们，在我们取源获取这个文件时，该文件在源服务器最后一次修改的时间。那么我们在回源验证时，将这个mod_time放到我们取源构建的请求头的If-Modified-Since中，源收到这个头之后，就会去查看文件在这个时间以后，有没有被修改过，如果修改过，那么源通过回应304响应，告知下游文件未发送变化，文件可以重用。否则，就通过200响应，发送最新文件。</p>
+
+<p>一般的情况，缓存服务器都会把响应头跟响应体保存在一个文件中。接下来作为hit处理的后续流程，往往需要先去读取保存文件中的响应头，其中我们需要关心的是Last-Modified头。因为客户端可能携带着If-Modified-Since头，我们需要对比两者是否相等，如果相等，那么我们认为文件在客户端询问的时候之后没有改变过，我们给他304响应。这里有两个问题：</p>
+
+<ol>
+<li>为什么不把Last-Modified头放在store结构中，这样我们就不需要去读文件来获取这个头了。</li>
+</ol>
+
+<blockquote>
+<p>因为不同于一般的webserver，cache服务器给出的正常响应必须忠于源给出的响应，而很少有权利自己打包响应头，除非本机发生像5xx等这类情况，所以既然一定要读文件，就没有必要单独拿出来了。其次store结构作为每个文件的索引，会占用大量的内存。所以减少哪怕一个成员，在大量文件存储时，也能节省不少空间。</p>
+</blockquote>
+
+<ol>
+<li>如果客户端的If-Modified-Since跟我们的Last-Modified不相等，而是大于或者小于，该怎么处理？</li>
+</ol>
+
+<blockquote>
+<p>如果前者小于后者，毫无疑问应该回应200，因为我们的最后修改时间比客户端问的时间要新。如果大于呢？我们是否应该去回源验证呢？这种情况我们直接使用本地文件响应200处理。很多人认为这样处理不太合理，毕竟你作为缓存代理，无法知道在“未来”的时间点上，源有没有改动过文件。但是如果你去做回源验证，别人可能因此攻击你，每次都发带有If-Modified-Since将来很长时间的一个时间点，让你的缓存产生回源，极大的消耗你的性能，因为作为cache，减少回源是最核心的功能。CDN厂商之间的相互攻击早已不是什么新鲜事，我们都是交过学费的。</p>
+</blockquote>
+
+  </div>
+</article>
+
+<section class="post-footer-self-promotion inner">
+
+	<a href="http://weibo.com/u/1736566822" target="_blank">
+	<img class="avatar" src="/images/YongYuan.png" />
+	</a>
+	
+	<p>
+	<!--
+	Do you like <strong>coding</strong>? Do you like or would you like to learn <strong>surfing</strong>? Book your tickets for the next Le Wagon <a href="http://surfcamp.lewagon.org"><strong>Code &amp; Surf Camp</strong></a>!
+        -->
+	Thanks for reading! Do you want to keep up with what I do?
+	<a href="http://weibo.com/u/1736566822">Follow me on Weibo</a>.
+	
+	</p>
+
+	<div id="more-articles">
+	  
+	  <p>
+		If you liked this, feel free to <a href="/blog">browse other articles on my blog</a>.
+	  </p>
+	  
+	</div>
+<!--	
+    <a href="https://twitter.com/marcgg" class="twitter-follow-button" data-show-count="false" data-size="large">Follow @marcgg</a>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+    <a href="https://twitter.com/share" class="twitter-share-button" data-via="marcgg" data-size="large">Tweet</a>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+-->
+  </div>
+  
+</section>
+
+<div class="separator"></div>
+
+<section class="comments inner">
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'dmeearm'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</section>
+
+  <div class="separator"></div>
+
+  <div  style="border-bottom: 1px solid #ddd"></div>
+  <footer>
+    <p>
+      Made with <a href="http://jekyllrb.com/">Jekyll</a>,
+      hosted on <a href="https://github.com/dmeearm/dmeearm.github.io">Github Pages</a>. Theme inspired by <a href="http://marcgg.com">marcgg.com</a>.
+    </p>
+    <ul class="links">
+      <li>
+        <a href="https://github.com/dmeearm" title="See my code on GitHub">
+          <i class="icon-github"></i>
+        </a>
+      </li>
+      <li>
+        <a href="https://twitter.com/yujieding" title="Follow me on Twitter">
+          <i class="icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a href="http://weibo.com/u/1736566822" title="Contact me on Weibo"></a>
+          <i class="icon-feed"></i>
+      </li>
+      <li>
+        <a href="/feed.xml" title="Subscribe to my blog with RSS">
+          <i class="icon-feed"></i>
+        </a>
+      </li>
+    </ul>
+  </footer>
+
+    <script type="text/x-mathjax-config">
+    // 添加数学公式支持
+    MathJax.Hub.Config({
+    tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+    });
+
+    MathJax.Hub.Queue(function() {
+    // Fix <code> tags after MathJax finishes running. This is a
+    // hack to overcome a shortcoming of Markdown. Discussion at
+    // https://github.com/mojombo/jekyll/issues/199
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+    });
+    </script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-40867989-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+    /*!
+     * http://github.com/ssaunier/track-outbound-links
+     * Copyright 2013 Sébastien Saunier
+     * @license MIT
+     */
+    !function(e,t){function n(){for(var n=t.getElementsByTagName("a"),a=[],r=0;r<n.length;++r){var o=n[r];o.host!=e.location.host&&a.push(o)}return a}function a(n){for(var a=n.srcElement||n.target;a&&("undefined"==typeof a.tagName||"a"!=a.tagName.toLowerCase()||!a.href);)a=a.parentNode;a&&a.href&&(e._gaq&&_gaq.push(["_trackEvent","Outbound link","Click",a.href]),(!a.target||a.target.match(/^_(self|parent|top)$/i))&&(setTimeout(function(){t.location.href=a.href},150),n.preventDefault?n.preventDefault():n.returnValue=!1))}e.addEventListener("load",function(){var e=n();for(var t in e)e[t].addEventListener("click",a)})}(window,document);
+    var links = document.links;
+    for (var i = 0, linksLength = links.length; i < linksLength; i++) {
+       if (links[i].hostname != window.location.hostname) { links[i].target = '_blank'; }
+    }
+
+    /*
+     * Detect if we are included in an iframe => move.
+     */
+    if (window.top !== window.self
+        && !window.self.location.href.match(/headsha\.re/))
+    {
+      window.top.location.replace(window.self.location.href);
+    }
+  </script>
+
+  <!--
+  <script id="_webengage_script_tag" type="text/javascript">
+    // var _weq = _weq || {};
+    // _weq['webengage.licenseCode'] = '11b563c38';
+    // _weq['webengage.widgetVersion'] = "4.0";
+
+    // (function(d){
+    //   var _we = d.createElement('script');
+    //   _we.type = 'text/javascript';
+    //   _we.async = true;
+    //   _we.src = (d.location.protocol == 'https:' ? "https://ssl.widgets.webengage.com" : "http://cdn.widgets.webengage.com") + "/js/widget/webengage-min-v-4.0.js";
+    //   var _sNode = d.getElementById('_webengage_script_tag');
+    //   _sNode.parentNode.insertBefore(_we, _sNode);
+    // })(document);
+  </script>
+  -->
+
+</body>
+</html>
