@@ -35,10 +35,14 @@ tags: [dev]
 上面讲到nginx会出现并发取源的情况，很多公司对这块进行了定制。最常提到的是所谓取源合并。顾名思义，就是合并回源的请求。这项功能，nginx在比较新的版本里面已经支持了，使用的指令时proxy_cache_lock。官方wiki给出的说明:
 
 >syntax: proxy_cache_lock on | off;
+
 >default: proxy_cache_lock off;
->context: http, server, location
+
+>context: http, server, location;
+
 >This directive appeared in version 1.1.12.
-When enabled, only one request at a time will be allowed to populate a new cache element identified according to the proxy_cache_key directive by passing a request to a proxied server. Other requests of the same cache element will either wait for a response to appear in the cache, or the cache lock for this element to be released, up to the time set by the proxy_cache_lock_timeout directive.
+
+>When enabled, only one request at a time will be allowed to populate a new cache element identified according to the proxy_cache_key directive by passing a request to a proxied server. Other requests of the same cache element will either wait for a response to appear in the cache, or the cache lock for this element to be released, up to the time set by the proxy_cache_lock_timeout directive.
 
 另外一个地方就是当文件过期时，也会产生大量的并发回源量。这点nginx也做了处理，很多公司也对这块做了自己的定制。nginx通过指令proxy_cache_use_stale来控制在文件过期更新过程的回源请求量，让当一个请求在更新文件时，其他请求则暂时使用过期文件。具体配置为proxy_cache_use_stale updating;关于该指令的具体用法，大家可以去官网查阅。
 
