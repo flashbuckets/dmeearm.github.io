@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google-site-verification" content="aexITLS38FdIRzwj25OVWxm87rpa9l-UV0URTyC9cTs" />
+  <title>
+    缓存服务器设计与实现(三)
+    
+  </title>
+  <link rel="stylesheet" href="/css/site.css">
+  <!--<link type="text/css" rel="stylesheet" href="http://fonts.googleapis.com/css?family=Ubuntu+Mono|Asap:400,700,400italic">-->
+  <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+<!--
+  
+-->
+  
+
+  
+</head>
+<body>
+  <div class="top-bar">
+<!--    
+    In September, come to France to <a href="http://surfcamp.lewagon.org"><strong>code</strong> & <strong>surf</strong></a>!
+    -->
+  </div>
+
+  <div class="header-container">
+    <header class="inner">
+      <nav>
+        <a class="" href="/">About</a>
+        <a class="" href="/blog/">Blog</a>
+        <a class="" href="/project/">Project</a>
+        <a class=" contact" href="/contact/">Contact</a>
+        <!--<a href="https://github.com/dmeearm">Github</a>-->
+      </nav>
+      <div class="pull-right right logo">
+        <div class="name">
+          <a href="/">aweth0me</a><br />
+          <small>
+            <em>
+                <a href="/">System Development Engineer</a>
+            </em>
+          </small>
+        </div>
+        <img class="avatar" src="/images/YongYuan.png" alt="My profile picture" />
+      </div>
+      <div class="clear"></div>
+    </header>
+    <div class="clear"></div>
+  </div>
+
+  
+
+<article>
+  <h1 class="inner">
+    缓存服务器设计与实现(三)
+  </h1>
+
+  <p class="meta">Sunday 30 November 2014</p>
+
+  
+
+  <div class="post">
+    <p>这里我们讨论一个比较重要功能，在之前的文章中提到过，取源合并。为什么要单独把它拿出来讨论呢？其实主要是出于个人工作的角度。之前公司里的cache需要这样一个功能，现有的squid该功能不完善，并且也不太适合我们的业务。然后我们分别在cache和nginx上加了这个功能，不过现在的nginx版本已经原生支持了。呵呵，您也许不知道我们的nginx可是0.7.x的版本，我们当时开发的时候还在想，也许不久官方能做支持，可是谁知道这个不久是多久呢。</p>
+
+<p>进入正题吧，看看nginx如何去设计和实现的。</p>
+
+<p>这里我们把取源合并成为fetch merged。在默认情况下，nginx是不启用它的。要想使用，可以通过一个命令开启，即proxy_cache_lock，这里再次贴出官方wiki的说明：</p>
+
+<blockquote>
+<p>syntax: proxy_cache_lock on | off;
+default: proxy_cache_lock off;
+context: http, server, location
+This directive appeared in version 1.1.12.
+When enabled, only one request at a time will be allowed to populate a new cache element identified according to theproxy_cache_key directive by passing a request to a proxied server. Other requests of the same cache element will either wait for a response to appear in the cache, or the cache lock for this element to be released, up to the time set by the proxy_cache_lock_timeout directive.</p>
+</blockquote>
+
+<p>如果开启的话，在ngx_http_cache_t结构中有个成员叫lock，它会被置1。这个结构前面已经提过了，在一个cache中，总要有一个结构来沟通请求与其对应的缓存对象。同样的，在nginx中就是通过该结构。</p>
+
+<p>让我们想想流程。对象在取源的时候，其相应的控制结构已经存在，并且在系统中也已经可见。也就是说在一个请求正在取源的过程中，如果后续的同一请求再次到来，那么必然会找到这个对象。显然此时的对象跟正常的是有区别的，在cache中我们通常用pending和ok状态来区分两者。nginx并没有通过这些状态来处理，当一个对象未缓存完整时，一个名为updating的成员会置1，同时exists成员置0。这两个成员在整个缓存过程中起到了很重要的作用，不仅仅是fetch merged。如果哪位同学要去翻阅代码，那这两个成员的运用一定要注意。</p>
+
+<p>在开启fetch merged的时候，nginx会让后续的请求等待一段时间(默认是5秒)。在这段时间内，nginx每500ms去检查缓存是否正常结束(updating是否被置0)，如果结束了，那么就会在后面的处理流程中发现已经缓存好的文件，即可hit了。如果时间挺长，过了等待的最长时间，那么针对该缓存文件的fetch merged机制就会cancel，这样后续的请求就会跟普通情况下一样，继续去后端fetch文件了。当然这里的cancel处理不会影响其他文件的fetch merged。</p>
+
+<p>上面说过在fetch merged中，默认的等待时间是5秒，这个时间是可以通过配置来控制的。即proxy_cache_lock_timeout，具体使用方法可以去官方wiki查看。聊到这里，各位可能看出来了。nginx这个东西做的有点鸡肋，因为它为了减轻后端的压力，却给客户端造成了延迟。特别是对于大文件取源时间长，一来你要让客户端去等，二来等待时间过去之后，又要去取源。我认为很多公司可能对nginx这个功能都不太认可，特别是CDN公司。一般公认的比较好的处理方式就是一边接收一边分发，这样子很合理。不过在处理起来有些麻烦，接下来的时间，就跟大家一起来讨论下这个方案吧。</p>
+
+<p>首先需要第一个请求去后端取数据，在这期间，相同请求过来的时候，需要有种机制来发现那个正在进行取源的请求，进而来完成合并。nginx用的是rbtree，所有的缓存对象都以有一个node的形式登记在树中(关于这点，我了解的比较多的情况是用hash表，那种使用冲突链表的实现)。找到取源的对象才是第一步，后面的步骤就是要通过这个请求来做数据分发，最简单的方式就是这个request的结构中添加一个队列，需要合并的请求挂载到上面去，然后取回来的数据分发给队列上的每个请求。但是问题并不这么简单：当这个取源的请求取源结束，一般的处理是要释放该请求，那么我们需要在释放请求之前保证数据分发完，或者通过其他的机制来让该请求释放之后，能够完成后续的分发工作。对于前者，我们不得不在request结构体中增加引用计数，或者其他的计数方式。只有计数为0，才意味着分发工作，请求可以释放了。这种处理是可以的，但是如果你是在原来的系统上搞二次开发，那么你需要在暴多的地方来添加计数检查的代码，那真是梦魇。我们用的是后者，具体地，是将需要合并的请求挂载一个全局的hash表，需要合并的请求会在表中添加一个条目，我们不妨称为一个node，这个node中管理了一个队列，上面管理着同一个文件的所有合并请求。我们需要做的就是让这个node在数据完全分发完之后，才会被销毁。这点的处理不像那种request中添加计数那样，相对来说代码耦合小很多，而仅仅多了一个hash表的内存消耗。</p>
+
+<p>分发动作其实很简单。首先的准备工作就是在request中添加一些成员，标记已发多少，下次需要发多少之类的。在事件方面的处理上，客户端关闭的事件，通过注册读事件处理函数就可以发现。对于写，当取源正在进行时，我们不需要设置什么处理函数，此时的发送依赖于取源请求的分发。而取源请求的分发本身依赖于读写的触发，所以当取源结束时，也就不会有事件来驱动分发了。这也好处理，当取源完成以后做最后一次分发的时候，给每个合并的请求设置新的读写事件处理函数，这样一来，后续的分发就可以通过读写事件来驱动，并且大家也有缓存完好的文件可用。当然具体实现方法有很多，但是思路一般就是这样子了。那么在这种模型下，怎么合理正确的处理异常呢？我们的处理遵循简单粗暴的原则：如果客户端关了，那么没啥好说的，直接将它从队列里踢掉就行了。如果取源的连接出现了问题，则依次关闭队列上的各个请求连接。这里其实不需要考虑什么更友好的处理方式，因为源宕机一般不能瞬间恢复，给这些合并的请求找个“后妈”，往往也于事无补。不过像nginx这种有负载均衡机制的，可以去尝试找个“后妈”。</p>
+
+<p>这里提一下关于多进程取源合并的两种实现，第一种是进程内合并，另一种是进程间合并。对于进程内的，合并请求node使用的hash表是进程内的，所以同一文件会有最大进程个数数量的并发连接取源，这个并发量是完全可以接受的。如果我们将这个hash放到共享内存中，就有希望实现进程间完美的合并。但是仅仅这样就可以了吗？进程间合并是个棘手的事。首当其冲的问题就是谁负责分发？进程内合并，取源请求可以肩负起分发的重任，因为队列上的请求都是属于本进程的。如果我们将hash表及其队列放到了共享内存，分发的时候就要区分哪些是属于自己进程的。哪些不属于自己进程的呢？对于基于磁盘文件的cache，相对好处理一些。因为各个进程内的请求都可以在每次有可写事件时，去磁盘上查看是否有新内容，从而将数据发送出去。万一没有新数据的话，又要重新添加事件，这样每次epoll_wait都会报很多事件。这仅仅一种实现。</p>
+
+<p>再看全内存cache，它的文件内容全部放在内存中。那么通过查看磁盘文件来发送数据的路彻底没戏了，那么内容如何分发，换句话说，除了取源请求所在的进程，其他进程中的合并请求如何被告知，何时有新内容要发送？之前我们讨论过一个方案，就是这些请求设置一些定时器，过一段时间去查看内容是否有更新，但这样跟nginx的实现类似了，由于定时器的存在，客户端增加了延迟。加事件的方式前面讨论了，也不行。所以无论磁盘缓存还是内存缓存，通知何时可分发是个关键问题，也是最棘手的问题。我们的目标就是要让其他进程异步得到通知，而不是忙等(定时器和事件在这里就是)，所以信号貌似可以：取源的进程向其他进程发送信号，告诉他们有内容更新了。收到信号的进程在信号处理函数中完成数据的分发，但是这样做会导致系统内信号满天飞，加上信号处理函数的特殊性，这种方案的可行性有待商榷。我们的程序经过调研之后还是选择了进程内的合并，目前看来完全满足需求。nginx虽然解决了进程间合并的这个问题，但是它以客户端的的延迟做代价，这点在我们的CDN业务上是难以接受的。</p>
+
+<p>所以既不过多影响性能，有能实时异步的实现进程间合并，还是有很多问题要解决的。这里留着跟大家一起讨论吧。</p>
+
+  </div>
+</article>
+
+<section class="post-footer-self-promotion inner">
+
+	<a href="http://weibo.com/u/1736566822" target="_blank">
+	<img class="avatar" src="/images/YongYuan.png" />
+	</a>
+	
+	<p>
+	<!--
+	Do you like <strong>coding</strong>? Do you like or would you like to learn <strong>surfing</strong>? Book your tickets for the next Le Wagon <a href="http://surfcamp.lewagon.org"><strong>Code &amp; Surf Camp</strong></a>!
+        -->
+	Thanks for reading! Do you want to keep up with what I do?
+	<a href="http://weibo.com/u/1736566822">Follow me on Weibo</a>.
+	
+	</p>
+
+	<div id="more-articles">
+	  
+	  <p>
+		If you liked this, feel free to <a href="/blog">browse other articles on my blog</a>.
+	  </p>
+	  
+	</div>
+<!--	
+    <a href="https://twitter.com/marcgg" class="twitter-follow-button" data-show-count="false" data-size="large">Follow @marcgg</a>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+    <a href="https://twitter.com/share" class="twitter-share-button" data-via="marcgg" data-size="large">Tweet</a>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+-->
+  </div>
+  
+</section>
+
+<div class="separator"></div>
+
+<section class="comments inner">
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'dmeearm'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</section>
+
+  <div class="separator"></div>
+
+  <div  style="border-bottom: 1px solid #ddd"></div>
+  <footer>
+    <p>
+      Made with <a href="http://jekyllrb.com/">Jekyll</a>,
+      hosted on <a href="https://github.com/dmeearm/dmeearm.github.io">Github Pages</a>. Theme inspired by <a href="http://marcgg.com">marcgg.com</a>.
+    </p>
+    <ul class="links">
+      <li>
+        <a href="https://github.com/dmeearm" title="See my code on GitHub">
+          <i class="icon-github"></i>
+        </a>
+      </li>
+      <li>
+        <a href="https://twitter.com/yujieding" title="Follow me on Twitter">
+          <i class="icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a href="http://weibo.com/u/1736566822" title="Contact me on Weibo"></a>
+          <i class="icon-feed"></i>
+      </li>
+      <li>
+        <a href="/feed.xml" title="Subscribe to my blog with RSS">
+          <i class="icon-feed"></i>
+        </a>
+      </li>
+    </ul>
+  </footer>
+
+    <script type="text/x-mathjax-config">
+    // 添加数学公式支持
+    MathJax.Hub.Config({
+    tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+    });
+
+    MathJax.Hub.Queue(function() {
+    // Fix <code> tags after MathJax finishes running. This is a
+    // hack to overcome a shortcoming of Markdown. Discussion at
+    // https://github.com/mojombo/jekyll/issues/199
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+    });
+    </script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-40867989-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+    /*!
+     * http://github.com/ssaunier/track-outbound-links
+     * Copyright 2013 Sébastien Saunier
+     * @license MIT
+     */
+    !function(e,t){function n(){for(var n=t.getElementsByTagName("a"),a=[],r=0;r<n.length;++r){var o=n[r];o.host!=e.location.host&&a.push(o)}return a}function a(n){for(var a=n.srcElement||n.target;a&&("undefined"==typeof a.tagName||"a"!=a.tagName.toLowerCase()||!a.href);)a=a.parentNode;a&&a.href&&(e._gaq&&_gaq.push(["_trackEvent","Outbound link","Click",a.href]),(!a.target||a.target.match(/^_(self|parent|top)$/i))&&(setTimeout(function(){t.location.href=a.href},150),n.preventDefault?n.preventDefault():n.returnValue=!1))}e.addEventListener("load",function(){var e=n();for(var t in e)e[t].addEventListener("click",a)})}(window,document);
+    var links = document.links;
+    for (var i = 0, linksLength = links.length; i < linksLength; i++) {
+       if (links[i].hostname != window.location.hostname) { links[i].target = '_blank'; }
+    }
+
+    /*
+     * Detect if we are included in an iframe => move.
+     */
+    if (window.top !== window.self
+        && !window.self.location.href.match(/headsha\.re/))
+    {
+      window.top.location.replace(window.self.location.href);
+    }
+  </script>
+
+  <!--
+  <script id="_webengage_script_tag" type="text/javascript">
+    // var _weq = _weq || {};
+    // _weq['webengage.licenseCode'] = '11b563c38';
+    // _weq['webengage.widgetVersion'] = "4.0";
+
+    // (function(d){
+    //   var _we = d.createElement('script');
+    //   _we.type = 'text/javascript';
+    //   _we.async = true;
+    //   _we.src = (d.location.protocol == 'https:' ? "https://ssl.widgets.webengage.com" : "http://cdn.widgets.webengage.com") + "/js/widget/webengage-min-v-4.0.js";
+    //   var _sNode = d.getElementById('_webengage_script_tag');
+    //   _sNode.parentNode.insertBefore(_we, _sNode);
+    // })(document);
+  </script>
+  -->
+
+</body>
+</html>
