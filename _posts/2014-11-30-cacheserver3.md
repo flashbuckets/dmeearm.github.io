@@ -11,9 +11,12 @@ tags: [dev]
 这里我们把取源合并成为fetch merged。在默认情况下，nginx是不启用它的。要想使用，可以通过一个命令开启，即proxy_cache_lock，这里再次贴出官方wiki的说明：
 
 >syntax: proxy_cache_lock on | off;
-default: proxy_cache_lock off;
-context: http, server, location
-This directive appeared in version 1.1.12.
+
+>default: proxy_cache_lock off;
+
+>context: http, server, location
+
+>This directive appeared in version 1.1.12.
 When enabled, only one request at a time will be allowed to populate a new cache element identified according to theproxy_cache_key directive by passing a request to a proxied server. Other requests of the same cache element will either wait for a response to appear in the cache, or the cache lock for this element to be released, up to the time set by the proxy_cache_lock_timeout directive.
 
 如果开启的话，在ngx_http_cache_t结构中有个成员叫lock，它会被置1。这个结构前面已经提过了，在一个cache中，总要有一个结构来沟通请求与其对应的缓存对象。同样的，在nginx中就是通过该结构。
