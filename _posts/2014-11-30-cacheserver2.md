@@ -14,7 +14,7 @@ tags: [dev]
 
 在nginx中每个文件都在内存中都有相应的控制结构，称为一个node。这个结构是在共享内存中申请和管理的，为什么用共享内存？nginx作为多进程模型，我们希望在worker A中缓存的文件对象，在worker B中相同请求到来时也能够hit该对象，要不然就太废了。当然互斥也是不可避免的。
 
-在nginx具体实现中，这个node是结构体ngx_http_file_cache_node_t。关于这个结构中各个成员的说明，可以参考http://www.pagefault.info/?p=375，这里就不多说了。当一个node首次创建之后，需要放入到系统的缓存管理体系中，nginx用到的是红黑树，所有的node都被插入到树里面，然后还要放到lru队列中，作用就是在存储空间不够的时候，通过lru来删掉一些对象。我们的cache在lru方面跟nginx是一致的，但是所有node是通过hash表来管理的。
+在nginx具体实现中，这个node是结构体ngx_http_file_cache_node_t。关于这个结构中各个成员的说明，可以参考[这里](http://www.pagefault.info/?p=375)，这里就不多说了。当一个node首次创建之后，需要放入到系统的缓存管理体系中，nginx用到的是红黑树，所有的node都被插入到树里面，然后还要放到lru队列中，作用就是在存储空间不够的时候，通过lru来删掉一些对象。我们的cache在lru方面跟nginx是一致的，但是所有node是通过hash表来管理的。
 
 其实细节需要讨论的东西实在是太多。现在还是先转到重点上来，来看一下nginx如何将收到的后端数据写到本地磁盘文件里去。
 
@@ -35,9 +35,9 @@ tags: [dev]
 上面讲到nginx会出现并发取源的情况，很多公司对这块进行了定制。最常提到的是所谓取源合并。顾名思义，就是合并回源的请求。这项功能，nginx在比较新的版本里面已经支持了，使用的指令时proxy_cache_lock。官方wiki给出的说明:
 
 >syntax: proxy_cache_lock on | off;
-default: proxy_cache_lock off;
-context: http, server, location
-This directive appeared in version 1.1.12.
+>default: proxy_cache_lock off;
+>context: http, server, location
+>This directive appeared in version 1.1.12.
 When enabled, only one request at a time will be allowed to populate a new cache element identified according to the proxy_cache_key directive by passing a request to a proxied server. Other requests of the same cache element will either wait for a response to appear in the cache, or the cache lock for this element to be released, up to the time set by the proxy_cache_lock_timeout directive.
 
 另外一个地方就是当文件过期时，也会产生大量的并发回源量。这点nginx也做了处理，很多公司也对这块做了自己的定制。nginx通过指令proxy_cache_use_stale来控制在文件过期更新过程的回源请求量，让当一个请求在更新文件时，其他请求则暂时使用过期文件。具体配置为proxy_cache_use_stale updating;关于该指令的具体用法，大家可以去官网查阅。
