@@ -147,19 +147,18 @@ cycle-&gt;conf_ctx =ngx_pcalloc(pool, ngx_max_module * sizeof(void *));
 
 <p>(2)  NGX_MAIN_CONF</p>
 
-<p>这样的配置包括event，http等，他们没有init函数，所以实际的空间分配需要在set函数内完成，于是就有了：
-```
-conf =&amp;(((void **) cf-&gt;ctx)[ngx_modules[i]-&gt;index]); //取指针的地址</p>
+<p>这样的配置包括event，http等，他们没有init函数，所以实际的空间分配需要在set函数内完成，于是就有了：</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">conf =&amp;(((void **) cf-&gt;ctx)[ngx_modules[i]-&gt;index]); //取指针的地址
 
-<p>rv =cmd-&gt;set(cf, cmd, conf);                                     // 指针在函数内被赋值</p>
+rv =cmd-&gt;set(cf, cmd, conf);                                     // 指针在函数内被赋值
 
-<p>set中conf参数是一个二重指针，这也就有个之后在ngx_http_block中的语句：</p>
+set中conf参数是一个二重指针，这也就有个之后在ngx_http_block中的语句：
 
-<p>ctx =ngx_pcalloc(cf-&gt;pool, sizeof(ngx_http_conf_ctx_t));</p>
+ctx =ngx_pcalloc(cf-&gt;pool, sizeof(ngx_http_conf_ctx_t));
 
-<p><em>(ngx_http_conf_ctx_t *</em>) conf = ctx;
-```
-3）其他</p>
+*(ngx_http_conf_ctx_t **) conf = ctx;
+</code></pre></div>
+<p>3）其他</p>
 
 <p>其实这里的“其他”，主要是一些server和location的类型的command，这些command大量的集中于http的相关配置中。</p>
 
